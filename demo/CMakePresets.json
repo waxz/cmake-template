@@ -1,0 +1,79 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "vs2026",
+      "displayName": "Visual Studio 2026 (x64)",
+      "inherits": "windows-base",
+      "generator": "Visual Studio 18 2026",
+      "architecture": { "value": "x64", "strategy": "set" }
+    },
+    {
+      "name": "vs2022",
+      "displayName": "Visual Studio 2022 (x64)",
+      "inherits": "windows-base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": { "value": "x64", "strategy": "set" }
+    },
+    {
+      "name": "ninja-msvc",
+      "displayName": "Ninja Multi-Config + MSVC (run from a VS Developer prompt)",
+      "inherits": "windows-base",
+      "generator": "Ninja Multi-Config",
+      "architecture": { "value": "x64", "strategy": "external" },
+      "cacheVariables": { "CMAKE_C_COMPILER": "cl", "CMAKE_CXX_COMPILER": "cl" }
+    },
+    {
+      "name": "ninja",
+      "displayName": "Ninja, single config (GCC / Clang / MinGW)",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
+      "generator": "Ninja",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "vs2026-debug", "configurePreset": "vs2026", "configuration": "Debug" },
+    { "name": "vs2026-release", "configurePreset": "vs2026", "configuration": "Release" },
+    { "name": "vs2022-debug", "configurePreset": "vs2022", "configuration": "Debug" },
+    { "name": "vs2022-release", "configurePreset": "vs2022", "configuration": "Release" },
+    { "name": "ninja-msvc-debug", "configurePreset": "ninja-msvc", "configuration": "Debug" },
+    { "name": "ninja-msvc-release", "configurePreset": "ninja-msvc", "configuration": "Release" },
+    { "name": "ninja", "configurePreset": "ninja" }
+  ],
+  "testPresets": [
+    { "name": "vs2026-debug", "configurePreset": "vs2026", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "vs2026-release", "configurePreset": "vs2026", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "vs2022-debug", "configurePreset": "vs2022", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "vs2022-release", "configurePreset": "vs2022", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "ninja-msvc-debug", "configurePreset": "ninja-msvc", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "ninja-msvc-release", "configurePreset": "ninja-msvc", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "ninja", "configurePreset": "ninja", "output": { "outputOnFailure": true } }
+  ],
+  "workflowPresets": [
+    {
+      "name": "vs2026-release",
+      "steps": [
+        { "type": "configure", "name": "vs2026" },
+        { "type": "build", "name": "vs2026-release" },
+        { "type": "test", "name": "vs2026-release" }
+      ]
+    },
+    {
+      "name": "vs2026-debug",
+      "steps": [
+        { "type": "configure", "name": "vs2026" },
+        { "type": "build", "name": "vs2026-debug" },
+        { "type": "test", "name": "vs2026-debug" }
+      ]
+    }
+  ]
+}

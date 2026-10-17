@@ -1,0 +1,3 @@
+# Example runtime configuration copied next to demo_app
+log_level: info
+threads: 4

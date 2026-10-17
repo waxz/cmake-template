@@ -1,0 +1,13 @@
+# Build and install output
+build/
+build-*/
+out/
+install/
+_CPack_Packages/
+
+# IDE / local settings
+.vs/
+.vscode/
+.idea/
+cmake-build-*/
+CMakeUserPresets.json

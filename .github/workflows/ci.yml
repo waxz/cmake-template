@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ninja (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: demo (Debug, sanitizers, superbuild, install)
+        run: >
+          cmake -P cmake/build.cmake -- -S demo -B build/demo-debug --config Debug
+          --prefix install/demo -DENABLE_SANITIZERS=ON -DDEMO_USE_SUPERBUILD=ON
+
+      - name: Run the installed demo
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then ./install/demo/bin/demo_app.exe; else ./install/demo/bin/demo_app; fi
+
+      - name: demo (Release, packages)
+        run: cmake -P cmake/build.cmake -- -S demo -B build/demo-release --package
+
+      - name: demo_lib (shared and static into one prefix)
+        run: |
+          cmake -P cmake/build.cmake -- -S demo_lib -B build/lib-shared --prefix install/calc
+          cmake -P cmake/build.cmake -- -S demo_lib -B build/lib-static --prefix install/calc -DBUILD_SHARED_LIBS=OFF
+
+      - name: demo_consumer (find_package, both variants)
+        run: |
+          cmake -P cmake/build.cmake -- -S demo_consumer -B build/consumer-shared -DCalc_ROOT=install/calc -DCALC_VARIANT=shared
+          cmake -P cmake/build.cmake -- -S demo_consumer -B build/consumer-static -DCalc_ROOT=install/calc -DCALC_VARIANT=static
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.os }}
+          path: |
+            build/demo-release/packages/*.zip
+            build/demo-release/packages/*.exe
+            build/demo-release/packages/*.tar.gz
+            build/demo-release/packages/*.deb
+          if-no-files-found: error
