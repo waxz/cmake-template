@@ -317,7 +317,7 @@ cmake --workflow --preset vs2026-release
 | `Could not find a package configuration file provided by "Calc"` | install `demo_lib` first; pass its prefix with `-DCalc_ROOT` / `-DCMAKE_PREFIX_PATH` (absolute when calling `cmake` directly) |
 | `The static variant of Calc is not installed` | build `demo_lib` with `-DBUILD_SHARED_LIBS=OFF` into the same prefix |
 | `LNK2038 mismatch detected for 'RuntimeLibrary'` | Debug app linking a Release-only library; install the library's Debug build too |
-| `LNK2038 mismatch detected for 'annotate_string'` | MSVC ASan target linking a non-ASan library; use `set_asan()`, which disables the annotations |
+| `LNK2038 mismatch detected for 'annotate_string'` / `'annotate_vector'` / `'annotate_optional'` | MSVC ASan target linking a non-ASan library; use `set_asan()`, which defines `_DISABLE_STL_ANNOTATION` |
 
 ## Continuous integration
 

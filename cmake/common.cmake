@@ -121,8 +121,11 @@ function(set_asan target)
     set(debug "$<CONFIG:Debug>")
     if(_ct_msvc)
         target_compile_options(${target} PRIVATE "$<${debug}:/fsanitize=address>")
-        # Allows linking non-ASan libraries (prebuilt / superbuilt) that use std::string / std::vector
+        # Allows linking non-ASan libraries (prebuilt / superbuilt) that use the STL; otherwise
+        # LNK2038 'annotate_string' / 'annotate_vector' / 'annotate_optional' (MSVC 14.51+) mismatch.
+        # _DISABLE_STL_ANNOTATION covers all containers; the other two are for older toolsets.
         target_compile_definitions(${target} PRIVATE
+                "$<${debug}:_DISABLE_STL_ANNOTATION>"
                 "$<${debug}:_DISABLE_STRING_ANNOTATION>" "$<${debug}:_DISABLE_VECTOR_ANNOTATION>")
         set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_CHECKS "") # /RTC with CMake >= 4.0
         target_link_options(${target} PUBLIC "$<${debug}:/INCREMENTAL:NO>")
